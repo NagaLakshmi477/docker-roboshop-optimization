@@ -3,10 +3,18 @@ networks:
     driver: bridge
     name: roboshop
     #external: true
+volumes:
+  mongodb:
+  redis:
+  rabbitmq:
+  mysql: # docker volumes and we need to mounte this in our service files like the default locxation
+
 services:
   mongodb:
     image: lakshmi1092/mongodb:v1
     container_name: mongodb
+    volumes:
+      - mongodb:/data/db
   catalogue:
     image: lakshmi1092/catalogue:v1
     container_name: catalogue
@@ -15,6 +23,8 @@ services:
   redis:
     image: redis:7.0
     container_name: redis
+    volumes:
+      - redis:/data
   user:
     image: lakshmi1092/user:v1
     container_name: user
@@ -30,6 +40,8 @@ services:
   mysql:
     image: lakshmi1092/mysql:v1
     container_name: mysql
+    volumes:
+      - mysql:/var/lib/mysql
   shipping:
     image: lakshmi1092/shipping:v1
     container_name: shipping
@@ -39,6 +51,8 @@ services:
   rabbitmq:
     image: rabbitmq:3
     container_name: rabbitmq
+    volumes:
+      - rabbitmq:/var/lib/rabbitmq
     environment:
       RABBITMQ_DEFAULT_USER: roboshop
       RABBITMQ_DEFAULT_PASSWORD: roboshop123
