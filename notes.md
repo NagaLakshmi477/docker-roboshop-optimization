@@ -1,15 +1,17 @@
 Optimization:
 ===================
-docker login -u lakshmi315
+docker login -u lakshmi1092/
 cd roboshop-docker
 
 for i in $(ls -d */); do
   cd "$i"
   name=$(basename "$i" /)
-  docker build -t lakshmi315/$name:v1 .
-  docker push lakshmi315/$name:v1
+  docker build -t lakshmi1092/$name:v1 .
+  docker push lakshmi1092/$name:v1
   cd ..
 done
+
+
 
 this is build image and push images
 base name means it removes the / in names it gives  only names
@@ -40,7 +42,7 @@ while rendering for user it will show tables and columns
 where to store the data from official image:
 --------------------------------------------
 
-docker login -u lakshmi315
+docker login -u lakshmi1092/
 
 /data/db
 we can check:
@@ -73,13 +75,16 @@ docker compose up -->
 include volumes in compose file:
 ----------------------------
 
-docker compose run 
+docker compose run -d
+docker compose down
+# still volumes are not removed
+# next remove all images
 docker rmi `docker images -a -q `----> to remove all images
 
 now we will descrese the image size:
 catalogue: FROM node:20-alphine3.21
-docker build -t lakshmi315/catalogue:v1 .
-docker push lakshmi315/catalogue:v1
+docker build -t lakshmi1092//catalogue:v1 .
+docker push lakshmi1092//catalogue:v1
 cd ..
 docker compose up -d --> recreating 
 docker images
@@ -100,7 +105,7 @@ we can copy what you want from builder to final image.
 this reduces the memory un nesaray instalation
 
 cd catalogue
-docker build -t lakshmi315/catalogue:v1 .
+docker build -t lakshmi1092//catalogue:v1 .
 docker images
 cd ..
 docker compose up -d
@@ -108,14 +113,14 @@ docker compose up -d
 optimised docker layers:
 =========================
 cd users
-DOCKER_BUILDKIT=0 docker build -t lakshmi315/catalogue:v1 --no-cache .
+DOCKER_BUILDKIT=0 docker build -t lakshmi1092//catalogue:v1 --no-cache .
 
 OUTPUT:
 ---------
 FROM node:20(1st intrscution) ----> pull ----> from this it will create a container(intermediate contnaer) ---> on top of this it will run second command (WORKDIR /opt/server/) -----> from this again it creates the image (c10b18d0862b) ----> from this image again it run the container(63f71edeecde) ------> same process for remaing .....
 
 If you trying push image another time it will not push the entrie code beacuse it conatin all layers.
-docker push -d lakshmi315/user:v1
+docker push -d lakshmi1092//user:v1
 
 all intermediate layer are deleted and it gives final moutput
 
@@ -138,14 +143,14 @@ getting secreat from secreat manager
 implementing volumes
 
 cd catalogue/
-docker build -t lakshmi315/catalogue:v1
-docker login -u lakshmi315
-docker push lakshmi315/catalogue:v1
+docker build -t lakshmi1092//catalogue:v1
+docker login -u lakshmi1092/
+docker push lakshmi1092//catalogue:v1
 docker compose up -d
 docker ps
 docker images
 
-for i in cart catalogue user ; do cd $i; docker build -t lakshmi315/$i:v1 . ; docker push lakshmi/$i:v1 ;cd ..;   done
+for i in cart catalogue user ; do cd $i; docker build -t lakshmi1092//$i:v1 . ; docker push lakshmi/$i:v1 ;cd ..;   done
 docker images
 docker compose up -d
 docker restart frontend
