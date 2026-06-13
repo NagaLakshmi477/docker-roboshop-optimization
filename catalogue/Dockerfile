@@ -7,9 +7,9 @@ COPY *.js .
 
 RUN npm install
 
-EXPOSE 8080
 
-ENV MONGO="true"
-ENV MONGO_URL="mongodb://mongodb:27017/catalogue"
+
+ENV MONGO="true" \
+ MONGO_URL="mongodb://mongodb:27017/catalogue"
 
 CMD ["node", "server.js"]
