@@ -75,6 +75,7 @@ now we will descrese the image size:
 catalogue: FROM node:20-alphine3.21
 docker build -t lakshmi1092//catalogue:v1 .
 docker push lakshmi1092//catalogue:v1
+docker exec -it catalogue sh --> for alpine
 cd ..
 docker compose up -d --> recreating 
 docker images
