@@ -6,13 +6,8 @@ cd roboshop-docker
 for i in $(ls -d */); do cd "$i" name=$(basename "$i" /) docker build -t lakshmi1092/$name:v1 . docker push lakshmi1092/$name:v1 cd ..
 done
 
-
-
 this is build image and push images
 base name means it removes the / in names it gives  only names
-
-1. use minimal official images
-catalogue --> 
 
 =======================================
 -v host-dir:container-dir
