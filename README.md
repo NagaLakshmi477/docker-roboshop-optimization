@@ -3,12 +3,7 @@ Optimization:
 docker login -u lakshmi1092/
 cd roboshop-docker
 
-for i in $(ls -d */); do
-  cd "$i"
-  name=$(basename "$i" /)
-  docker build -t lakshmi1092/$name:v1 .
-  docker push lakshmi1092/$name:v1
-  cd ..
+for i in $(ls -d */); do cd "$i" name=$(basename "$i" /) docker build -t lakshmi1092/$name:v1 . docker push lakshmi1092/$name:v1 cd ..
 done
 
 
