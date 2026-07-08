@@ -104,7 +104,7 @@ docker compose up -d
 optimised docker layers:
 =========================
 cd users
-DOCKER_BUILDKIT=0 docker build -t lakshmi1092//catalogue:v1 --no-cache .
+DOCKER_BUILDKIT=0 docker build -t lakshmi1092/user:v1 --no-cache .
 
 OUTPUT:
 ---------
@@ -126,8 +126,6 @@ use customized networks
 implementing volumes
 COPY over ADD
 docker igonre not load everything into docker
-
-
 impelementing health cheks
 limiting resources
 getting secreat from secreat manager
@@ -135,8 +133,8 @@ implementing volumes
 
 cd catalogue/
 docker build -t lakshmi1092//catalogue:v1
-docker login -u lakshmi1092/
-docker push lakshmi1092//catalogue:v1
+docker login -u lakshmi1092
+docker push lakshmi1092/catalogue:v1
 docker compose up -d
 docker ps
 docker images
@@ -153,4 +151,25 @@ JDK ---> java development kit
 jdk ---> no need of developement env(runs bytecode)
 in java we did everything using maven
 
-cd shipping
+Docker Architecutre:
+===================
+client ---> docker CLI where we can run our docker commands
+host ----> where docker is running, docker deamon(continousy running)
+repos ---> local and central repo
+
+what happen when we run 
+docker run nginx
+----------------
+1. 1st it checks the image is in local or not
+2. if exstis then it will create the conatiner
+3. if not exsit then it wil pull from registry and  create the conatiner and send the o/p to client
+4. they are docker volumes and networkig we can configure 
+
+Disadvanatges
+==============
+auto scaling: There is no deafult auto scaling methods
+load blancing: no load blancing components to blance the traffic b/w the containers
+reliablity: If container crashes it will not automatically restart(no self healing)
+what if docker host crash: all conatiner are goes down
+what about storage: if docker host crashes we loose data also beacuse docker is manging volumes on the same host
+networking is in bridge mode, if you have multiple docker hosts bridge host will not work
