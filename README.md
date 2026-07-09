@@ -81,148 +81,237 @@ We have three tiers:
 - The data can be stored on the server or any persistent storage location.
 - The database stores the actual application data in tables and columns.
 - The application reads the data from the database and displays it to the user.
+# Docker Named Volumes
 
-where to store the data from official image:
---------------------------------------------
+## Where is the Data Stored?
 
-docker login -u lakshmi1092/
+Official Docker images usually store their application data in a predefined directory.
 
-/data/db
-we can check:
-docker volume
-docker volume create nginx
+**Example:**
+
+- MongoDB → `/data/db`
+
+This is the directory where MongoDB stores its database files.
+
+---
+
+## Docker Volume Commands
+
+List all Docker volumes:
+
+```bash
 docker volume ls
+```
+
+Create a named volume:
+
+```bash
+docker volume create nginx
+```
+
+Inspect the volume:
+
+```bash
 docker inspect nginx
+```
 
-we will details stored details
-/var/lib/docker/volumes/nginx/_data ----> it create the volumes floder ans stored the data
+This command shows the details of the volume.
 
-docker run -d -v nginx:/usr/nginx/share/nginx/html -p 80:80 nginx
+Docker stores the volume data under:
 
-nginx: ---> created volume
-/usr/share/nginx/html ---> This is the directory inside the container where the volume will be mounted.
+```text
+/var/lib/docker/volumes/nginx/_data
+```
 
-docker exec -t <id> bash
-cd /usr/share/nginx/html/
+Docker automatically creates this directory and manages it.
+
+---
+
+## Mount a Named Volume
+
+```bash
+docker run -d \
+-v nginx:/usr/share/nginx/html \
+-p 80:80 \
+nginx
+```
+
+### Explanation
+
+- `nginx` → Docker named volume.
+- `/usr/share/nginx/html` → Directory inside the container where the volume is mounted.
+
+---
+
+## Verify the Volume
+
+Login to the container:
+
+```bash
+docker exec -it <container_id> bash
+```
+
+Go to the mounted directory:
+
+```bash
+cd /usr/share/nginx/html
+```
+
+Create a file:
+
+```bash
 echo "hello" > hello.txt
+```
+
+Exit the container:
+
+```bash
 exit
-we can remove the <id>
+```
+
+Remove the container:
+
+```bash
+docker rm -f <container_id>
+```
+
+---
+
+## Verify the Data on the Host
+
+Become the root user:
+
+```bash
 sudo su -
+```
+
+Go to the Docker volume directory:
+
+```bash
 cd /var/lib/docker/volumes/nginx/_data
-here we can see our files
-we can run:
-docker run -d -v nginx:/usr/nginx/share/nginx/html -p 80:80 nginx
-Here diff container but same dir
-docker compose run ----applicaton will delete bu volumes are not delete
-docker compose up -->
-include volumes in compose file:
-----------------------------
+```
 
-docker compose run -d
+The `hello.txt` file is still present because it is stored in the Docker volume.
+
+---
+
+## Start Another Container
+
+```bash
+docker run -d \
+-v nginx:/usr/share/nginx/html \
+-p 80:80 \
+nginx
+```
+
+This creates a **new container**, but it uses the **same Docker volume** (`nginx`).
+
+Therefore, the new container can access the existing data stored in the volume.
+
+---
+
+## Docker Compose
+
+Remove the application:
+
+```bash
 docker compose down
-# still volumes are not removed
-# next remove all images
-docker rmi `docker images -a -q `----> to remove all images
+```
 
-now we will descrese the image size:
-catalogue: FROM node:20-alphine3.21
-docker build -t lakshmi1092//catalogue:v1 .
-docker push lakshmi1092//catalogue:v1
-docker exec -it catalogue sh --> for alpine
-cd ..
-docker compose up -d --> recreating 
-docker images
-now the image size is decreased 
+> By default, `docker compose down` removes the containers and network, but **named volumes are not removed**.
 
-use minimal images
-use official images
-run it as non root ---> complted
+Start the application again:
 
-multi stage build:
-=================
-now we will decraese the size  of memory
-multi stage builds introduce multiple stages in your Dockerile each with specfic purpose
-
-multi stage builds are keeping multiple docker files in a single docker file,
-One docker file use it as builder and another docker flle we can use it as final image 
-we can copy what you want from builder to final image.
-this reduces the memory un nesaray instalation
-
-cd catalogue
-docker build -t lakshmi1092//catalogue:v1 .
-docker images
-cd ..
+```bash
 docker compose up -d
+```
 
-optimised docker layers:
-=========================
-cd users
-DOCKER_BUILDKIT=0 docker build -t lakshmi1092/user:v1 --no-cache .
+The containers are recreated and continue using the same named volumes, so the data is preserved.# Include Volumes in Docker Compose
 
-OUTPUT:
----------
-FROM node:20(1st intrscution) ----> pull ----> from this it will create a container(intermediate contnaer) ---> on top of this it will run second command (WORKDIR /opt/server/) -----> from this again it creates the image (c10b18d0862b) ----> from this image again it run the container(63f71edeecde) ------> same process for remaing .....
+Start the application:
 
-If you trying push image another time it will not push the entrie code beacuse it conatin all layers.
-docker push -d lakshmi1092//user:v1
+```bash
+docker compose up -d
+```
 
-all intermediate layer are deleted and it gives final moutput
+Stop and remove the containers:
 
-------------------------------------
-docker best practices:
-==========================
-minimum and offical images
-multi stage builds
-optimising layers and combining RUN commands
-non root containers
-use customized networks
-implementing volumes
-COPY over ADD
-docker igonre not load everything into docker
-impelementing health cheks
-limiting resources
-getting secreat from secreat manager
-implementing volumes
+```bash
+docker compose down
+```
 
-cd catalogue/
-docker build -t lakshmi1092//catalogue:v1
-docker login -u lakshmi1092
+> **Note:** `docker compose down` removes the containers and network, but **named volumes are not removed** by default. The data is still preserved.
+
+---
+
+## Remove All Images
+
+```bash
+docker rmi $(docker images -aq)
+```
+
+> This command removes all local Docker images.
+
+---
+
+# Image Optimization
+
+## 1. Use Minimal Images
+
+Update the Dockerfile:
+
+```dockerfile
+FROM node:20-alpine3.21
+```
+
+Build the image:
+
+```bash
+docker build -t lakshmi1092/catalogue:v1 .
+```
+
+Push the image:
+
+```bash
 docker push lakshmi1092/catalogue:v1
+```
+
+> **Note:** Alpine images are smaller than the standard images, which reduces the image size.
+
+---
+
+## Access the Alpine Container
+
+```bash
+docker exec -it catalogue sh
+```
+
+> Alpine Linux uses `sh` instead of `bash`.
+
+---
+
+## Recreate the Containers
+
+```bash
 docker compose up -d
-docker ps
+```
+
+Docker recreates the containers using the latest image.
+
+---
+
+## Verify the Image Size
+
+```bash
 docker images
+```
 
-for i in cart catalogue user ; do cd $i; docker build -t lakshmi1092//$i:v1 . ; docker push lakshmi/$i:v1 ;cd ..;   done
-docker images
-docker compose up -d
-docker restart frontend
+You can observe that the image size has decreased.
 
+---
 
-source code ---> complie ----> bytecode(intermediate language).
-for develping this source code we need jdk
-JDK ---> java development kit
-jdk ---> no need of developement env(runs bytecode)
-in java we did everything using maven
+# Image Optimization Best Practices
 
-Docker Architecutre:
-===================
-client ---> docker CLI where we can run our docker commands
-host ----> where docker is running, docker deamon(continousy running)
-repos ---> local and central repo
-
-what happen when we run 
-docker run nginx
-----------------
-1. 1st it checks the image is in local or not
-2. if exstis then it will create the conatiner
-3. if not exsit then it wil pull from registry and  create the conatiner and send the o/p to client
-4. they are docker volumes and networkig we can configure 
-
-Disadvanatges
-==============
-auto scaling: There is no deafult auto scaling methods
-load blancing: no load blancing components to blance the traffic b/w the containers
-reliablity: If container crashes it will not automatically restart(no self healing)
-what if docker host crash: all conatiner are goes down
-what about storage: if docker host crashes we loose data also beacuse docker is manging volumes on the same host
-networking is in bridge mode, if you have multiple docker hosts bridge host will not work
+- Use minimal base images (for example, Alpine images).
+- Use official Docker images whenever possible.
+- Run containers as a non-root user.
