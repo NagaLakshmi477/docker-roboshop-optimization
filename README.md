@@ -1,33 +1,86 @@
-Optimization:
-===================
-docker login -u lakshmi1092/
+# Image Optimization
+
+## Login to Docker Hub
+
+```bash
+docker login -u lakshmi1092
+```
+
+---
+
+## Go to the Project Directory
+
+```bash
 cd roboshop-docker
+```
 
-for i in $(ls -d */); do cd "$i" name=$(basename "$i" /) docker build -t lakshmi1092/$name:v1 . docker push lakshmi1092/$name:v1 cd ..
+---
+
+## Build and Push All Images
+
+```bash
+for i in $(ls -d */)
+do
+    cd "$i"
+    name=$(basename "$i")
+    docker build -t lakshmi1092/$name:v1 .
+    docker push lakshmi1092/$name:v1
+    cd ..
 done
+```
 
-this is build image and push images
-base name means it removes the / in names it gives  only names
+### Explanation
 
-=======================================
--v host-dir:container-dir
-/usr/share/nginx/html ----> nginx html dir
+- `ls -d */` → Lists all directories in the current location.
+- `cd "$i"` → Changes to each application directory.
+- `basename "$i"` → Removes the trailing `/` and returns only the directory name.
+- `docker build -t lakshmi1092/$name:v1 .` → Builds the Docker image and tags it.
+- `docker push lakshmi1092/$name:v1` → Pushes the image to Docker Hub.
+- `cd ..` → Returns to the parent directory and continues with the next directory.
 
-un-named/un managed volumes:
-=============================
-if we create dir and manage it then those are un named / un managed volumes
-if docker creates volumes and managed them theyare named and managed volumes
+> **Note:** `basename` removes the trailing `/` from the directory name and returns only the directory name.
 
-stateless vs statefull
-============================
-we have web tier,appliction tier, db tier 
+# Stateless vs Stateful Applications
 
-where the data is imp is called statefull applications.
-where the data is not imp like web and app we canget the data from git so this not imp data this is called stateless 
+We have three tiers:
 
-volumes should be created to statefull applications ---db tier
-The data can be stroed in server/any location. Database store the actual data in host directories.
-while rendering for user it will show tables and columns
+- Web Tier
+- Application Tier
+- Database Tier
+
+---
+
+## Stateless Applications
+
+- Applications where the data is **not important to persist** are called **stateless applications**.
+- Even if the container is removed, we can recreate it from the application source code (for example, from Git).
+- Since no important data is stored inside the container, volumes are not required.
+
+**Examples:**
+
+- Web Tier
+- Application Tier
+
+---
+
+
+## Stateful Applications
+
+- Applications where the data is **important and must be preserved** are called **stateful applications**.
+- If the container is removed, the data should not be lost.
+- Therefore, volumes should be created for stateful applications.
+
+**Example:**
+
+- Database Tier
+
+---
+
+## Data Storage
+
+- The data can be stored on the server or any persistent storage location.
+- The database stores the actual application data in tables and columns.
+- The application reads the data from the database and displays it to the user.
 
 where to store the data from official image:
 --------------------------------------------
